@@ -437,7 +437,24 @@ TPLEOF
     fi
 
     # Подставляем реальные ссылки и домен
-    sed -i         -e "s|PLACEHOLDER_BOT|$CFG_BOT_LINK|g"         -e "s|PLACEHOLDER_SUP|$CFG_SUPPORT_LINK|g"         -e "s|"https://t.me/ВАШ_БОТ"|"$CFG_BOT_LINK"|g"         -e "s|"https://t.me/ВАША_ПОДДЕРЖКА"|"$CFG_SUPPORT_LINK"|g"         -e "s|footerCopy:"© 2025 HIDEYOU"|footerCopy:"© 2025 $DOMAIN"|g"         "$_cfg_tmp"
+    # Подставляем реальные ссылки и домен через python3
+    python3 - "$_cfg_tmp" "$CFG_BOT_LINK" "$CFG_SUPPORT_LINK" "$DOMAIN" << 'PYEOF2'
+import sys
+path, bot, sup, domain = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+with open(path, 'r') as f:
+    c = f.read()
+for placeholder, value in [
+    ('PLACEHOLDER_BOT', bot),
+    ('PLACEHOLDER_SUP', sup),
+    ('https://t.me/MyVPN_bot', bot),
+    ('https://t.me/MySupport', sup),
+    ('\u00a9 2025 HIDEYOU', '\u00a9 2025 ' + domain),
+    ('© 2025 HIDEYOU', '© 2025 ' + domain),
+]:
+    c = c.replace(placeholder, value)
+with open(path, 'w') as f:
+    f.write(c)
+PYEOF2
 
     cp "$_cfg_tmp" "$PRIVATE_DIR/config.js"
     rm -f "$_cfg_tmp"
