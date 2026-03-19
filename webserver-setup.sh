@@ -126,14 +126,27 @@ github_pull() {
 self_install() {
     step "Установка глобальной команды webm..."
 
+    # Уже установлен — просто обновляем с GitHub
     if [[ "$SCRIPT_PATH" == "$INSTALL_PATH" ]]; then
         log "Команда webm уже установлена в $INSTALL_PATH"
         return
     fi
 
-    cp "$SCRIPT_PATH" "$INSTALL_PATH"
-    chmod +x "$INSTALL_PATH"
+    # Запущен с диска — копируем файл
+    if [[ -f "$SCRIPT_PATH" ]]; then
+        cp "$SCRIPT_PATH" "$INSTALL_PATH"
+    # Запущен через pipe (bash <(curl ...)) — скачиваем с GitHub
+    else
+        step "Скачиваю webm с GitHub..."
+        if curl -fsSL "$GITHUB_RAW/webserver-setup.sh" -o "$INSTALL_PATH"; then
+            log "webm скачан с GitHub"
+        else
+            error "Не удалось скачать скрипт. Проверь доступность GitHub."
+            return 1
+        fi
+    fi
 
+    chmod +x "$INSTALL_PATH"
     log "Команда ${BOLD}webm${RESET} установлена → $INSTALL_PATH"
     log "Теперь в любом месте запускай: ${CYAN}sudo webm${RESET}"
 }
