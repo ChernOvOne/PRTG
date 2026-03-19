@@ -195,8 +195,8 @@ install_dependencies() {
     apt_run "Fail2ban (защита от брутфорса)" \
         apt-get install -y fail2ban
 
-    apt_run "logwatch + unattended-upgrades (авто-патчи)" \
-        apt-get install -y logwatch unattended-upgrades
+    apt_run "unattended-upgrades (авто-патчи безопасности)" \
+        apt-get install -y unattended-upgrades
 
     spacer
     log "Все зависимости установлены! 🎉"
