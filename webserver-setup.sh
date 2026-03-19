@@ -493,11 +493,15 @@ server {
     ssi_silent_errors off;
 
     # ── Блокировка прямого доступа к приватным файлам ───────────
-    location ~ /\. { deny all; return 404; }
+    # Скрытые файлы и служебные расширения
+    location ~ /\.(?!private/) { deny all; return 404; }
     location ~* \.(env|log|conf|bak|sql|sh|git)$ { deny all; return 404; }
 
-    # .private — только для SSI, браузер получает 404
-    location ^~ /.private/ { internal; }
+    # .private — прямой доступ из браузера запрещён, SSI работает через виртуальный путь
+    location ^~ /.private/ {
+        deny all;
+        return 404;
+    }
 
     location / {
         try_files \$uri \$uri/ =404;
