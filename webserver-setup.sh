@@ -475,7 +475,7 @@ PYEOF2
 server {
     listen 80;
     listen [::]:80;
-    server_name $DOMAIN www.$DOMAIN;
+    server_name $DOMAIN;
 
     root $SITE_DIR;
     index index.html index.htm;
@@ -542,7 +542,7 @@ issue_ssl() {
     read -rp "$(echo -e "  ${CYAN}Email для Let's Encrypt:${RESET} ")" EMAIL
 
     spacer
-    certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" \
+    certbot --nginx -d "$DOMAIN" \
         --non-interactive --agree-tos \
         --email "$EMAIL" --redirect \
         2>&1 | tee -a "$LOG_FILE" | sed 's/^/  /'
@@ -557,19 +557,40 @@ delete_site() {
 
     spacer
     read -rp "$(echo -e "  ${CYAN}Домен для удаления:${RESET} ")" DOMAIN
-    [[ -z "$DOMAIN" ]] && return
+    [[ -z "$DOMAIN" ]] && { info "Отменено."; return; }
 
     spacer
     warn "Это удалит ${BOLD}$DOMAIN${RESET} и все файлы навсегда!"
     read -rp "$(echo -e "  ${RED}Введи «yes» для подтверждения:${RESET} ")" CONFIRM
     [[ "$CONFIRM" != "yes" ]] && { info "Отменено."; return; }
 
-    rm -f "$NGINX_ENABLED/$DOMAIN" "$NGINX_SITES/$DOMAIN"
-    rm -rf "$WEB_ROOT/$DOMAIN"
-    certbot delete --cert-name "$DOMAIN" --non-interactive >> "$LOG_FILE" 2>&1 || true
-    nginx -t >> "$LOG_FILE" 2>&1 && systemctl reload nginx >> "$LOG_FILE" 2>&1
+    spacer
+    step "Удаляю конфиг Nginx..."
+    rm -f "$NGINX_ENABLED/$DOMAIN"      && log "Симлинк удалён"        || warn "Симлинк не найден"
+    rm -f "$NGINX_SITES/$DOMAIN"        && log "Конфиг Nginx удалён"   || warn "Конфиг Nginx не найден"
 
-    log "Сайт $DOMAIN полностью удалён."
+    step "Удаляю файлы сайта..."
+    rm -rf "${WEB_ROOT:?}/$DOMAIN"      && log "Файлы сайта удалены"   || warn "Файлы не найдены"
+
+    step "Удаляю приватный конфиг..."
+    rm -rf "/etc/nginx/private/$DOMAIN" && log "config.js удалён"      || warn "Приватный конфиг не найден"
+
+    step "Удаляю SSL-сертификат..."
+    if certbot delete --cert-name "$DOMAIN" --non-interactive >> "$LOG_FILE" 2>&1; then
+        log "SSL-сертификат удалён"
+    else
+        warn "SSL-сертификат не найден или уже удалён"
+    fi
+
+    step "Перезагружаю Nginx..."
+    if nginx -t >> "$LOG_FILE" 2>&1 && systemctl reload nginx >> "$LOG_FILE" 2>&1; then
+        log "Nginx перезагружен"
+    else
+        error "Ошибка Nginx — проверь: nginx -t"
+    fi
+
+    spacer
+    log "Сайт ${BOLD}$DOMAIN${RESET} полностью удалён ✅"
 }
 
 list_sites() {
