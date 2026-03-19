@@ -32,7 +32,6 @@ NGINX_SITES="/etc/nginx/sites-available"
 NGINX_ENABLED="/etc/nginx/sites-enabled"
 LOG_FILE="/var/log/webm.log"
 INSTALL_PATH="/usr/local/bin/webm"
-SCRIPT_PATH="$(realpath "$0")"
 # ── URL публичного GitHub репо (вшит в скрипт) ──────────────
 GITHUB_RAW="https://raw.githubusercontent.com/ChernOvOne/PRTG/main"
 
@@ -126,29 +125,19 @@ github_pull() {
 self_install() {
     step "Установка глобальной команды webm..."
 
-    # Уже установлен — просто обновляем с GitHub
-    if [[ "$SCRIPT_PATH" == "$INSTALL_PATH" ]]; then
-        log "Команда webm уже установлена в $INSTALL_PATH"
+    if [[ -x "$INSTALL_PATH" ]] && diff -q         <(curl -fsSL "$GITHUB_RAW/webserver-setup.sh" 2>/dev/null)         "$INSTALL_PATH" &>/dev/null; then
+        log "Команда webm уже актуальна в $INSTALL_PATH"
         return
     fi
 
-    # Запущен с диска — копируем файл
-    if [[ -f "$SCRIPT_PATH" ]]; then
-        cp "$SCRIPT_PATH" "$INSTALL_PATH"
-    # Запущен через pipe (bash <(curl ...)) — скачиваем с GitHub
+    if curl -fsSL "$GITHUB_RAW/webserver-setup.sh" -o "$INSTALL_PATH"; then
+        chmod +x "$INSTALL_PATH"
+        log "Команда ${BOLD}webm${RESET} установлена → $INSTALL_PATH"
+        log "Теперь в любом месте запускай: ${CYAN}sudo webm${RESET}"
     else
-        step "Скачиваю webm с GitHub..."
-        if curl -fsSL "$GITHUB_RAW/webserver-setup.sh" -o "$INSTALL_PATH"; then
-            log "webm скачан с GitHub"
-        else
-            error "Не удалось скачать скрипт. Проверь доступность GitHub."
-            return 1
-        fi
+        error "Не удалось скачать скрипт с GitHub."
+        return 1
     fi
-
-    chmod +x "$INSTALL_PATH"
-    log "Команда ${BOLD}webm${RESET} установлена → $INSTALL_PATH"
-    log "Теперь в любом месте запускай: ${CYAN}sudo webm${RESET}"
 }
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
