@@ -348,7 +348,7 @@ _create_index_placeholder() {
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#0f172a;color:#f8fafc;display:flex;align-items:center;justify-content:center;min-height:100vh}.card{text-align:center;padding:3rem 4rem;border:1px solid #1e293b;border-radius:16px}h1{font-size:2rem;color:#38bdf8;margin-bottom:.5rem}.badge{background:#0ea5e9;color:#fff;font-size:.75rem;padding:.25rem .75rem;border-radius:999px;margin-bottom:1.5rem;display:inline-block}p{color:#94a3b8;margin:.5rem 0}code{background:#1e293b;color:#38bdf8;padding:.15rem .5rem;border-radius:6px}</style>
 </head><body>
 <script>
-<!--# include file="$private_dir/config.js" -->
+<!--# include virtual="/.private/config.js" -->
 </script>
 <div class="card"><h1>🚀 $domain</h1>
 <div class="badge">Сервер работает · SSI активен</div>
@@ -382,8 +382,8 @@ create_site() {
     chown -R www-data:www-data "$WEB_ROOT/$DOMAIN"
     chmod -R 755 "$WEB_ROOT/$DOMAIN"
 
-    # ── Приватная директория для config.js (вне web-root) ──────
-    PRIVATE_DIR="/etc/nginx/private/$DOMAIN"
+    # ── Приватная директория для config.js (внутри web-root, скрыта через Nginx) ──
+    PRIVATE_DIR="$SITE_DIR/.private"
     mkdir -p "$PRIVATE_DIR"
     chmod 750 "$PRIVATE_DIR"
 
@@ -464,7 +464,7 @@ PYEOF2
     # ── index.html — скачиваем с GitHub ────────────────────────
     if github_pull "index.html" "$SITE_DIR/index.html"; then
         # Подставляем реальный домен в SSI-тег
-        sed -i "s|/etc/nginx/private/ВАШ_ДОМЕН/config.js|/etc/nginx/private/$DOMAIN/config.js|g"             "$SITE_DIR/index.html"
+        log "SSI путь прописан верно: /.private/config.js"
         log "index.html скачан с GitHub и настроен для $DOMAIN"
     else
         warn "Не удалось скачать index.html — создаю заглушку."
@@ -494,8 +494,8 @@ server {
     location ~ /\. { deny all; return 404; }
     location ~* \.(env|log|conf|bak|sql|sh|git)$ { deny all; return 404; }
 
-    # Прямой запрос к config.js через браузер — запрещён
-    location = /config.js { deny all; return 404; }
+    # .private — только для SSI, браузер получает 404
+    location ^~ /.private/ { internal; }
 
     location / {
         try_files \$uri \$uri/ =404;
@@ -574,7 +574,7 @@ delete_site() {
     rm -rf "${WEB_ROOT:?}/$DOMAIN"      && log "Файлы сайта удалены"   || warn "Файлы не найдены"
 
     step "Удаляю приватный конфиг..."
-    rm -rf "/etc/nginx/private/$DOMAIN" && log "config.js удалён"      || warn "Приватный конфиг не найден"
+    rm -rf "$SITE_DIR/.private" && log "config.js удалён" || warn "Приватный конфиг не найден"
 
     step "Удаляю SSL-сертификат..."
     if certbot delete --cert-name "$DOMAIN" --non-interactive >> "$LOG_FILE" 2>&1; then
