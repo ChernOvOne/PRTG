@@ -385,6 +385,7 @@ create_site() {
     # ── Приватная директория для config.js (внутри web-root, скрыта через Nginx) ──
     PRIVATE_DIR="$SITE_DIR/.private"
     mkdir -p "$PRIVATE_DIR"
+    chown www-data:www-data "$PRIVATE_DIR"
     chmod 750 "$PRIVATE_DIR"
 
     # ── config.js — скачиваем с GitHub (или из кэша), подставляем данные
@@ -459,6 +460,7 @@ PYEOF2
     cp "$_cfg_tmp" "$PRIVATE_DIR/config.js"
     rm -f "$_cfg_tmp"
 
+    chown www-data:www-data "$PRIVATE_DIR/config.js"
     chmod 640 "$PRIVATE_DIR/config.js"
 
     # ── index.html — скачиваем с GitHub ────────────────────────
