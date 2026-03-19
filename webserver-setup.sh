@@ -553,11 +553,12 @@ issue_ssl() {
 
 delete_site() {
     section "🗑️  Удаление сайта"
+    set +e  # отключаем выход по ошибке на время функции
     list_sites
 
     spacer
     read -rp "$(echo -e "  ${CYAN}Домен для удаления:${RESET} ")" DOMAIN
-    [[ -z "$DOMAIN" ]] && { info "Отменено."; return; }
+    if [[ -z "$DOMAIN" ]]; then info "Отменено."; set -e; return; fi
 
     spacer
     warn "Это удалит ${BOLD}$DOMAIN${RESET} и все файлы навсегда!"
@@ -591,6 +592,7 @@ delete_site() {
 
     spacer
     log "Сайт ${BOLD}$DOMAIN${RESET} полностью удалён ✅"
+    set -e  # восстанавливаем
 }
 
 list_sites() {
@@ -605,8 +607,9 @@ list_sites() {
         found=1
 
         local SSL_TAG="${DIM}[без SSL]${RESET}"
-        certbot certificates 2>/dev/null | grep -q "Domains:.*$NAME" \
-            && SSL_TAG="${GREEN}[🔐 SSL]${RESET}"
+        if certbot certificates 2>/dev/null | grep -q "Domains:.*$NAME"; then
+            SSL_TAG="${GREEN}[🔐 SSL]${RESET}"
+        fi
 
         echo -e "  🟢 ${BOLD}${CYAN}$NAME${RESET}  $SSL_TAG"
         echo -e "     ${DIM}📁 $WEB_ROOT/$NAME/html${RESET}"
