@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HideYou — MTProto Прокси &amp; VPN</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cyan:#00e5ff; --mag:#ff2d6b; --gold:#ffc400; --green:#00e676;
+  --dk:#030b14; --dk2:#060f1e; --dk3:#0b1826;
+  --bd:rgba(0,229,255,.14); --bd2:rgba(0,229,255,.34);
+  --text:#c5dde8; --muted:#4a7080;
+  --ff:'Space Grotesk',sans-serif; --fm:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--dk);color:var(--text);font-family:var(--ff);font-size:16px;line-height:1.7;overflow-x:hidden;-webkit-text-size-adjust:100%;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);pointer-events:none;z-index:9999;}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.022) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+img,svg{max-width:100%;display:block;}
+.w{max-width:1060px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+nav{border-bottom:1px solid var(--bd);padding:14px 0;background:rgba(3,11,20,.97);backdrop-filter:blur(8px);position:sticky;top:0;z-index:200;}
+nav .w{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.logo{font-family:var(--fm);font-size:17px;font-weight:600;color:var(--cyan);letter-spacing:2px;text-decoration:none;flex-shrink:0;}
+.logo em{color:var(--mag);font-style:normal;}
+.nav-pill{font-family:var(--fm);font-size:10px;letter-spacing:2px;color:var(--muted);}
+.nav-r{display:flex;align-items:center;gap:10px;}
+.burger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px;z-index:210;}
+.burger span{display:block;width:22px;height:2px;background:var(--cyan);border-radius:1px;transition:all .25s;}
+.burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.burger.open span:nth-child(2){opacity:0;}
+.burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+.mobile-menu{display:none;position:fixed;inset:0;background:rgba(3,11,20,.98);z-index:190;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:24px;}
+.mobile-menu.open{display:flex;}
+.mobile-menu .mm-link{font-family:var(--fm);font-size:14px;letter-spacing:2px;color:var(--muted);text-decoration:none;transition:color .2s;}
+.mobile-menu .mm-link:hover{color:var(--cyan);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--ff);font-size:13px;font-weight:600;letter-spacing:.3px;padding:12px 22px;border:none;cursor:pointer;text-decoration:none;transition:all .2s;border-radius:2px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.btn-c{background:var(--cyan);color:#000;}
+.btn-c:hover{background:#fff;transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,229,255,.3);}
+.btn-c:active{transform:translateY(0);background:var(--cyan);}
+.btn-p{background:transparent;color:var(--mag);border:1px solid var(--mag);}
+.btn-p:hover{background:rgba(255,45,107,.08);transform:translateY(-2px);}
+.btn-p:active{transform:translateY(0);}
+.btn-g{background:transparent;color:var(--green);border:1px solid rgba(0,230,118,.4);}
+.btn-g:hover{background:rgba(0,230,118,.07);transform:translateY(-2px);}
+.btn-g:active{transform:translateY(0);}
+.btn-sm{padding:9px 16px;font-size:12px;}
+.btn-full{width:100%;}
+.hero{padding:64px 0 0;}
+.badge{display:inline-flex;align-items:center;gap:10px;font-family:var(--fm);font-size:10px;letter-spacing:2px;color:var(--mag);border:1px solid rgba(255,45,107,.32);padding:7px 14px;margin-bottom:24px;background:rgba(255,45,107,.04);}
+.blink{width:6px;height:6px;flex-shrink:0;border-radius:50%;background:var(--mag);animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+h1{font-size:clamp(36px,8vw,66px);font-weight:700;line-height:1.05;color:#fff;letter-spacing:-1px;margin-bottom:18px;}
+.c1{color:var(--cyan);}
+.c2{color:var(--mag);}
+.hero-sub{font-size:16px;color:var(--muted);max-width:560px;margin-bottom:32px;font-weight:400;line-height:1.65;}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:44px;}
+.explainers{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bd);border:1px solid var(--bd);margin-bottom:32px;}
+.ex-item{background:var(--dk2);padding:20px 18px;}
+.ex-num{font-family:var(--fm);font-size:10px;color:var(--mag);letter-spacing:2px;margin-bottom:6px;}
+.ex-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:5px;}
+.ex-desc{font-size:13px;color:var(--muted);line-height:1.55;}
+.proxy-block{background:var(--dk2);border:1px solid var(--bd2);position:relative;margin-bottom:72px;}
+.proxy-block::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--cyan),var(--mag));}
+.proxy-tabs{display:flex;border-bottom:1px solid var(--bd);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.proxy-tabs::-webkit-scrollbar{display:none;}
+.tab-btn{flex-shrink:0;padding:15px 22px;font-family:var(--fm);font-size:11px;letter-spacing:1.5px;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:8px;white-space:nowrap;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.tab-btn:hover{color:#fff;}
+.tab-btn.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.tab-tag{font-size:8px;letter-spacing:1px;padding:2px 7px;border-radius:2px;}
+.tag-c{background:rgba(0,229,255,.1);color:var(--cyan);}
+.tag-y{background:rgba(255,196,0,.1);color:var(--gold);}
+.tab-pane{display:none;padding:22px 24px 26px;}
+.tab-pane.active{display:block;}
+.tab-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+.tab-title{font-size:15px;font-weight:600;color:#fff;}
+.tab-sub{font-family:var(--fm);font-size:10px;letter-spacing:1.5px;color:var(--muted);margin-top:3px;}
+.proxy-list{display:flex;flex-direction:column;gap:10px;}
+.pe{background:var(--dk3);border:1px solid var(--bd);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px;transition:border-color .2s;flex-wrap:wrap;border-radius:2px;}
+.pe:hover{border-color:var(--bd2);}
+.pe-info{flex:1;min-width:140px;}
+.pe-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.pe-tag{font-family:var(--fm);font-size:8px;letter-spacing:1.5px;background:rgba(0,229,255,.1);color:var(--cyan);padding:2px 7px;border-radius:2px;}
+.pe-addr{font-family:var(--fm);font-size:11px;color:#2a4050;margin-bottom:2px;word-break:break-all;}
+.pe-desc{font-size:12px;color:var(--muted);}
+.se{background:var(--dk3);border:1px solid rgba(255,196,0,.14);padding:16px 18px;border-radius:2px;margin-bottom:10px;transition:border-color .2s;}
+.se:hover{border-color:rgba(255,196,0,.32);}
+.se-name{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;}
+.se-tag{font-family:var(--fm);font-size:8px;letter-spacing:1.5px;background:rgba(255,196,0,.1);color:var(--gold);padding:2px 7px;border-radius:2px;}
+.se-desc{font-size:12px;color:var(--muted);margin-bottom:12px;}
+.se-creds{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;background:var(--dk);border:1px solid rgba(255,196,0,.1);padding:12px 14px;border-radius:2px;margin-bottom:10px;}
+.cred-label{font-family:var(--fm);font-size:9px;letter-spacing:2px;color:#2a4050;margin-bottom:3px;}
+.cred-val{font-family:var(--fm);font-size:13px;color:var(--gold);display:flex;align-items:center;gap:6px;word-break:break-all;}
+.copy-btn{background:none;border:none;cursor:pointer;color:#2a4050;font-size:14px;padding:4px;transition:color .2s;line-height:1;flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.copy-btn:hover{color:var(--gold);}
+.se-hint{font-size:12px;color:#2a4050;line-height:1.6;}
+.empty-note{font-family:var(--fm);font-size:12px;color:#1a3040;padding:20px;text-align:center;border:1px dashed rgba(0,229,255,.08);border-radius:2px;}
+.proxy-note{margin-top:14px;padding:10px 14px;border-left:2px solid rgba(255,45,107,.38);background:rgba(255,45,107,.03);font-family:var(--fm);font-size:11px;color:#5a3050;line-height:1.6;}
+.proxy-note a{color:var(--mag);}
+.socks-howto{background:var(--dk3);border:1px solid rgba(255,196,0,.12);padding:14px 16px;border-radius:2px;margin-bottom:16px;font-size:13px;color:var(--muted);line-height:1.65;}
+.socks-howto-label{color:var(--gold);font-family:var(--fm);font-size:10px;letter-spacing:2px;display:block;margin-bottom:8px;}
+.sec{padding:64px 0;border-top:1px solid var(--bd);}
+.sec-tag{font-family:var(--fm);font-size:10px;letter-spacing:2.5px;color:var(--cyan);display:block;margin-bottom:10px;}
+.sec-h{font-size:clamp(22px,4vw,36px);font-weight:700;color:#fff;line-height:1.1;letter-spacing:-.5px;margin-bottom:12px;}
+.sec-d{color:var(--muted);max-width:540px;font-size:15px;line-height:1.65;}
+.how-grid{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start;margin-top:40px;}
+.how-steps{display:flex;flex-direction:column;}
+.how-step{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid rgba(0,229,255,.06);}
+.how-step:last-child{border-bottom:none;}
+.step-n{font-family:var(--fm);font-size:10px;color:var(--cyan);border:1px solid rgba(0,229,255,.28);width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px;border-radius:2px;}
+.step-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:4px;}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+.how-visual{background:var(--dk2);border:1px solid var(--bd);padding:22px;position:relative;border-radius:2px;}
+.how-visual::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--cyan),var(--mag));}
+.flow-box{background:var(--dk3);border:1px solid var(--bd);padding:10px 14px;font-family:var(--fm);font-size:12px;margin-bottom:7px;display:flex;align-items:center;gap:10px;border-radius:2px;}
+.flow-arrow{text-align:center;font-family:var(--fm);font-size:14px;color:var(--cyan);margin:3px 0;opacity:.5;}
+.flow-bad{border-color:rgba(255,45,107,.32);color:var(--mag);}
+.flow-ok{border-color:rgba(0,230,118,.32);color:var(--green);}
+.flow-lbl{font-family:var(--fm);font-size:9px;letter-spacing:2px;color:#1a3040;margin-top:12px;}
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--bd);margin-top:40px;}
+.cc{background:var(--dk2);padding:28px 24px;position:relative;}
+.cc.hot{background:linear-gradient(135deg,rgba(0,229,255,.03),rgba(255,45,107,.02));}
+.cc.hot::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--cyan),var(--mag));}
+.cc-tier{font-family:var(--fm);font-size:9px;letter-spacing:2.5px;margin-bottom:6px;}
+.t-free{color:var(--green);}.t-pro{color:var(--gold);}
+.cc-name{font-size:20px;font-weight:700;color:#fff;margin-bottom:6px;}
+.cc-proto{font-family:var(--fm);font-size:11px;color:var(--muted);margin-bottom:20px;padding:6px 10px;background:var(--dk3);border-left:2px solid var(--cyan);display:inline-block;}
+.cc-feats{list-style:none;margin-bottom:24px;}
+.cc-feats li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(0,229,255,.05);font-size:14px;color:#8ab0c0;}
+.mk{font-family:var(--fm);flex-shrink:0;font-size:12px;margin-top:1px;}
+.mk-g{color:var(--green);}.mk-r{color:var(--mag);}
+.specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--bd);margin-top:28px;}
+.spec{background:var(--dk3);padding:18px 14px;text-align:center;}
+.spec-val{font-family:var(--fm);font-size:19px;font-weight:600;color:var(--gold);display:block;margin-bottom:4px;}
+.spec-key{font-family:var(--fm);font-size:9px;letter-spacing:2px;color:#1a3040;}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:2px;background:var(--bd);margin-top:36px;}
+.plan{background:var(--dk2);padding:26px 22px;position:relative;}
+.plan.hot2{background:linear-gradient(135deg,rgba(0,229,255,.034),rgba(255,45,107,.018));}
+.plan.hot2::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--cyan),var(--mag));}
+.plan-badge{font-family:var(--fm);font-size:9px;letter-spacing:1.5px;color:#000;background:var(--gold);padding:4px 10px;display:inline-block;margin-bottom:10px;border-radius:2px;}
+.plan-tier{font-family:var(--fm);font-size:9px;letter-spacing:2.5px;color:var(--mag);margin-bottom:6px;}
+.plan-name{font-size:22px;font-weight:700;color:#fff;margin-bottom:16px;}
+.plan-feats{list-style:none;margin-bottom:20px;}
+.plan-feats li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(0,229,255,.05);font-size:14px;color:#8ab0c0;}
+.plan-feats .ico{font-family:var(--fm);color:var(--cyan);flex-shrink:0;}
+.plan-note{font-family:var(--fm);font-size:11px;color:#2a4050;margin-bottom:18px;padding:8px 10px;border-left:2px solid rgba(255,196,0,.3);background:rgba(255,196,0,.03);}
+.plan-tb{font-size:24px;font-weight:700;color:var(--cyan);margin-bottom:18px;}
+.plan-tb span{font-size:13px;color:var(--muted);font-weight:400;}
+.faq{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:var(--bd);margin-top:36px;}
+.faq-item{background:var(--dk2);padding:22px 18px;}
+.faq-q{font-size:14px;font-weight:600;color:var(--cyan);margin-bottom:8px;}
+.faq-a{font-size:13px;color:var(--muted);line-height:1.65;}
+.srv-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:36px;}
+.srv-tbl{width:100%;min-width:480px;border-collapse:collapse;font-family:var(--fm);font-size:12px;}
+.srv-tbl th{text-align:left;padding:10px 14px;color:#1a3040;letter-spacing:2px;font-size:9px;border-bottom:1px solid var(--bd);}
+.srv-tbl td{padding:13px 14px;border-bottom:1px solid rgba(0,229,255,.04);color:#7aa0b0;}
+.srv-tbl tr:hover td{background:rgba(0,229,255,.018);}
+.sbar{display:flex;align-items:center;gap:8px;}
+.sfill{height:3px;background:linear-gradient(90deg,var(--cyan),var(--mag));border-radius:1px;}
+.s-on{color:var(--green);font-size:9px;letter-spacing:1px;}
+.s-exp{color:var(--gold);font-size:9px;letter-spacing:1px;}
+.cta{padding:80px 0;border-top:1px solid var(--bd);text-align:center;}
+.cta h2{font-size:clamp(26px,5vw,48px);font-weight:700;color:#fff;letter-spacing:-1px;margin-bottom:14px;}
+.cta p{color:var(--muted);max-width:440px;margin:0 auto 28px;font-size:16px;}
+.cta-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+footer{border-top:1px solid var(--bd);padding:24px 0;background:var(--dk2);}
+footer .w{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+.f-links{display:flex;gap:20px;list-style:none;}
+.f-links a{color:#1a3040;text-decoration:none;font-family:var(--fm);font-size:10px;letter-spacing:1px;transition:color .2s;}
+.f-links a:hover{color:var(--cyan);}
+.f-copy{font-family:var(--fm);font-size:10px;color:#0a1820;letter-spacing:1px;}
+.toast{position:fixed;bottom:20px;right:16px;left:16px;text-align:center;background:var(--green);color:#000;font-family:var(--fm);font-size:12px;letter-spacing:1px;padding:12px 18px;border-radius:2px;z-index:9000;opacity:0;transition:opacity .3s;pointer-events:none;}
+.toast.show{opacity:1;}
+@media(max-width:900px){.nav-pill{display:none;}.explainers{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:720px){.w{padding:0 16px;}.hero{padding:48px 0 0;}.explainers{grid-template-columns:1fr 1fr;}.how-grid{grid-template-columns:1fr;}.cmp-grid{grid-template-columns:1fr;}.how-visual{margin-top:0;}.sec{padding:52px 0;}.cta{padding:64px 0;}}
+@media(max-width:520px){.nav-r .btn-sm{display:none;}.burger{display:flex;}h1{font-size:clamp(34px,10vw,52px);letter-spacing:-.5px;}.hero-sub{font-size:15px;}.hero-btns{flex-direction:column;align-items:flex-start;}.hero-btns .btn{width:100%;justify-content:center;}.badge{font-size:9px;letter-spacing:1.5px;padding:6px 12px;}.explainers{grid-template-columns:1fr;}.tab-pane{padding:16px 14px 20px;}.tab-head{flex-direction:column;align-items:flex-start;gap:10px;}.tab-head .btn{width:100%;justify-content:center;}.pe{flex-direction:column;align-items:flex-start;gap:10px;}.pe .btn{width:100%;justify-content:center;}.se-creds{grid-template-columns:1fr 1fr;}.cred-val{font-size:12px;}.sec{padding:44px 0;}.sec-d{font-size:14px;}.cc{padding:22px 18px;}.cc-feats li{font-size:13px;}.specs{grid-template-columns:repeat(2,1fr);}.plans{grid-template-columns:1fr;}.plan{padding:22px 18px;}.faq{grid-template-columns:1fr;}.cta-btns{flex-direction:column;align-items:stretch;}.cta-btns .btn{width:100%;justify-content:center;}footer .w{flex-direction:column;align-items:flex-start;gap:12px;}.f-copy{display:none;}.toast{font-size:11px;}}
+@media(max-width:360px){h1{font-size:30px;}.se-creds{grid-template-columns:1fr;}.spec-val{font-size:16px;}}
+</style>
+</head>
+<body>
+
+<!--
+  ════════════════════════════════════════════════════════════════
+  ⚙️  КОНФИГУРАЦИЯ подключается через SSI (Server Side Includes)
+  
+  Файл config.js хранится на сервере по пути:
+    /etc/nginx/private/ВАШ_ДОМЕН/config.js
+  
+  Браузер НЕ может получить этот файл напрямую.
+  Nginx вставляет его содержимое в HTML перед отправкой клиенту.
+  
+  Для редактирования конфига на сервере:
+    nano /etc/nginx/private/ВАШ_ДОМЕН/config.js
+  
+  Для загрузки с локального компьютера:
+    scp ./config.js user@IP:/etc/nginx/private/ВАШ_ДОМЕН/config.js
+  ════════════════════════════════════════════════════════════════
+-->
+<script>
+<!--# include file="/etc/nginx/private/ВАШ_ДОМЕН/config.js" -->
+</script>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#proxy-block" class="mm-link" onclick="closeMM()">⬡ Прокси Telegram</a>
+  <a href="#vpn" class="mm-link" onclick="closeMM()">⬡ VPN / VLESS</a>
+  <a id="mm-sup" href="#" target="_blank" class="mm-link">⬡ Поддержка</a>
+  <a id="mm-bot" href="#" target="_blank" class="btn btn-c" style="margin-top:8px;">⬡ VPN Бот</a>
+</div>
+
+<nav>
+  <div class="w">
+    <a href="#" class="logo">HIDE<em>YOU</em></a>
+    <div class="nav-r">
+      <span class="nav-pill" id="j-navpill"></span>
+      <a href="#proxy-block" class="btn btn-c btn-sm">⬡ Прокси</a>
+      <button class="burger" id="burgerBtn" onclick="toggleMM()" aria-label="Меню">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="w">
+    <div class="badge"><span class="blink"></span><span id="j-badge"></span></div>
+    <h1>
+      <div class="c1" id="j-h1"></div>
+      <div id="j-h2"></div>
+      <div><span class="c2" id="j-h3"></span></div>
+    </h1>
+    <p class="hero-sub" id="j-sub"></p>
+    <div class="hero-btns">
+      <a href="#proxy-block" class="btn btn-c">⬡ Подключить прокси — бесплатно</a>
+      <a id="j-vpnbtn" href="#" target="_blank" class="btn btn-p">⬡ VPN / VLESS</a>
+    </div>
+    <div class="explainers">
+      <div class="ex-item"><div class="ex-num">// 01</div><div class="ex-title" id="j-ex1t"></div><p class="ex-desc" id="j-ex1d"></p></div>
+      <div class="ex-item"><div class="ex-num">// 02</div><div class="ex-title" id="j-ex2t"></div><p class="ex-desc" id="j-ex2d"></p></div>
+      <div class="ex-item"><div class="ex-num">// 03</div><div class="ex-title" id="j-ex3t"></div><p class="ex-desc" id="j-ex3d"></p></div>
+    </div>
+    <div class="proxy-block" id="proxy-block">
+      <div class="proxy-tabs">
+        <button class="tab-btn active" onclick="switchTab('mt',this)"><span>MTProto</span><span class="tab-tag tag-c">Telegram</span></button>
+        <button class="tab-btn" onclick="switchTab('s5',this)"><span>SOCKS5</span><span class="tab-tag tag-y">Универсальный</span></button>
+      </div>
+      <div class="tab-pane active" id="tab-mt">
+        <div class="tab-head">
+          <div><div class="tab-title" id="j-pbtitle"></div><div class="tab-sub" id="j-pbsub"></div></div>
+          <a id="j-pbsup" href="#" target="_blank" class="btn btn-g btn-sm">⬡ Поддержка</a>
+        </div>
+        <div class="proxy-list" id="mt-list"></div>
+        <div class="proxy-note" id="j-pbnote"></div>
+      </div>
+      <div class="tab-pane" id="tab-s5">
+        <div class="tab-head">
+          <div><div class="tab-title">SOCKS5 ПРОКСИ</div><div class="tab-sub">IP · ПОРТ · ЛОГИН · ПАРОЛЬ — для любых приложений</div></div>
+          <a id="j-s5sup" href="#" target="_blank" class="btn btn-g btn-sm">⬡ Поддержка</a>
+        </div>
+        <div class="socks-howto">
+          <span class="socks-howto-label">// КАК ПОДКЛЮЧИТЬ В TELEGRAM</span>
+          Откройте Telegram → <strong style="color:#fff;">Настройки → Данные и хранилище → Использовать прокси → Добавить прокси → SOCKS5</strong>.
+          Введите IP, порт, логин и пароль. Нажмите 📋 чтобы скопировать любое поле.
+        </div>
+        <div id="s5-list"></div>
+        <div class="proxy-note">⚠ SOCKS5 работает в Telegram, браузерах и других приложениях. Нужна помощь? → <a id="j-s5note" href="#">Написать в поддержку</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="w">
+    <span class="sec-tag">// 01 · КАК ЭТО РАБОТАЕТ</span>
+    <h2 class="sec-h" id="j-howt"></h2>
+    <p class="sec-d" id="j-howd"></p>
+    <div class="how-grid">
+      <div class="how-steps">
+        <div class="how-step"><div class="step-n">01</div><div><div class="step-title" id="j-s1t"></div><p class="step-desc" id="j-s1d"></p></div></div>
+        <div class="how-step"><div class="step-n">02</div><div><div class="step-title" id="j-s2t"></div><p class="step-desc" id="j-s2d"></p></div></div>
+        <div class="how-step"><div class="step-n">03</div><div><div class="step-title" id="j-s3t"></div><p class="step-desc" id="j-s3d"></p></div></div>
+      </div>
+      <div class="how-visual">
+        <div class="flow-box flow-bad">✕ &nbsp;Без прокси → BLOCKED BY ISP</div>
+        <div style="height:10px"></div>
+        <div class="flow-box" style="color:#fff;font-weight:600;">[T] &nbsp;Telegram — зашифровано MTProto</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box">⬡ &nbsp;HideYou Proxy Server</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-box flow-ok">✓ &nbsp;Серверы Telegram — соединение установлено</div>
+        <div class="flow-lbl">// ПРОКСИ НЕ ВИДИТ СОДЕРЖИМОЕ ПЕРЕПИСКИ</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="w">
+    <span class="sec-tag">// 02 · ЧТО ВЫБРАТЬ</span>
+    <h2 class="sec-h" id="j-cmpt"></h2>
+    <p class="sec-d" id="j-cmpd"></p>
+    <div class="cmp-grid">
+      <div class="cc hot">
+        <div class="cc-tier t-free">// БЕСПЛАТНО</div>
+        <div class="cc-name">MTProto / SOCKS5</div>
+        <div class="cc-proto">ПРОТОКОЛ: MTProto · SOCKS5</div>
+        <ul class="cc-feats">
+          <li><span class="mk mk-g">✓</span>Telegram работает без блокировок</li>
+          <li><span class="mk mk-g">✓</span>MTProto — один клик, без настройки</li>
+          <li><span class="mk mk-g">✓</span>SOCKS5 — работает в любом приложении</li>
+          <li><span class="mk mk-g">✓</span>Абсолютно бесплатно</li>
+          <li><span class="mk mk-r">–</span>YouTube и сайты не разблокирует</li>
+          <li><span class="mk mk-r">–</span>Не шифрует весь трафик устройства</li>
+        </ul>
+        <a href="#proxy-block" class="btn btn-g">⬡ Подключить бесплатно</a>
+      </div>
+      <div class="cc">
+        <div class="cc-tier t-pro">// ПЛАТНО · PRO</div>
+        <div class="cc-name">VLESS VPN</div>
+        <div class="cc-proto">ПРОТОКОЛ: VLESS · весь трафик устройства</div>
+        <ul class="cc-feats">
+          <li><span class="mk mk-g">✓</span>Telegram + YouTube + всё остальное</li>
+          <li><span class="mk mk-g">✓</span>Скорость до 2 Гбит/с</li>
+          <li><span class="mk mk-g">✓</span>6 серверов в разных странах</li>
+          <li><span class="mk mk-g">✓</span>1000 ГБ трафика в месяц</li>
+          <li><span class="mk mk-g">✓</span>Шифрует весь трафик устройства</li>
+          <li><span class="mk mk-g">✓</span>Обход LTE-глушилок (PRO+)</li>
+        </ul>
+        <a id="j-cmpvpn" href="#" target="_blank" class="btn btn-p">⬡ Подключить VPN</a>
+      </div>
+    </div>
+    <div class="specs">
+      <div class="spec"><span class="spec-val">2 Гбит/с</span><span class="spec-key">СКОРОСТЬ VLESS</span></div>
+      <div class="spec"><span class="spec-val">VLESS</span><span class="spec-key">ПРОТОКОЛ VPN</span></div>
+      <div class="spec"><span class="spec-val">1000 ГБ</span><span class="spec-key">ТРАФИК / МЕС</span></div>
+      <div class="spec"><span class="spec-val">6+</span><span class="spec-key">СЕРВЕРОВ</span></div>
+      <div class="spec"><span class="spec-val">AES-256</span><span class="spec-key">ШИФРОВАНИЕ</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="w">
+    <span class="sec-tag">// 03 · ТАРИФЫ VPN</span>
+    <h2 class="sec-h" id="j-plnt"></h2>
+    <p class="sec-d" id="j-plnd"></p>
+    <div class="plans">
+      <div class="plan hot2">
+        <div class="plan-badge">ПОПУЛЯРНЫЙ</div>
+        <div class="plan-tier">// ТАРИФ</div>
+        <div class="plan-name">PRO</div>
+        <ul class="plan-feats">
+          <li><span class="ico">[+]</span>🇷🇺 Россия — YouTube</li>
+          <li><span class="ico">[+]</span>🇵🇱 Польша</li>
+          <li><span class="ico">[+]</span>🇳🇱 Нидерланды (PRO)</li>
+          <li><span class="ico">[+]</span>🇬🇧 Великобритания (PRO)</li>
+          <li><span class="ico">[+]</span>🇦🇱 Албания (PRO)</li>
+          <li><span class="ico">[+]</span>🇪🇸 Испания (PRO)</li>
+        </ul>
+        <div class="plan-tb">1000 <span>ГБ/МЕС</span></div>
+        <a id="j-p1btn" href="#" target="_blank" class="btn btn-c" style="width:100%;justify-content:center;">⬡ Подключить</a>
+      </div>
+      <div class="plan">
+        <div class="plan-tier">// ТАРИФ</div>
+        <div class="plan-name">PRO+</div>
+        <ul class="plan-feats">
+          <li><span class="ico">[+]</span>Все серверы тарифа PRO</li>
+          <li><span class="ico" style="color:var(--gold)">[★]</span>🇵🇱 Обход LTE-глушилок</li>
+        </ul>
+        <div class="plan-note">⚠ LTE-сервер списывает ×10 трафика: 10 ГБ использования = 100 ГБ с баланса. Экспериментальный, работает не у всех операторов.</div>
+        <div class="plan-tb" style="color:var(--mag);">1000 <span>ГБ/МЕС</span></div>
+        <a id="j-p2btn" href="#" target="_blank" class="btn btn-p" style="width:100%;justify-content:center;">⬡ Подключить</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="w">
+    <span class="sec-tag">// 04 · ЧАСТЫЕ ВОПРОСЫ</span>
+    <h2 class="sec-h">Всё что нужно знать</h2>
+    <div class="faq">
+      <div class="faq-item"><div class="faq-q">Безопасен ли MTProto прокси?</div><p class="faq-a">Да. Прокси видит только зашифрованный поток данных — содержимое переписки недоступно. MTProto шифрует сообщения ещё до передачи через прокси.</p></div>
+      <div class="faq-item"><div class="faq-q">Чем SOCKS5 отличается от MTProto?</div><p class="faq-a">MTProto — только для Telegram, подключается за один клик. SOCKS5 — универсальный, работает в Telegram, браузере, приложениях. Настраивается вручную по IP и порту.</p></div>
+      <div class="faq-item"><div class="faq-q">Что такое VLESS?</div><p class="faq-a">Современный VPN-протокол нового поколения. Провайдер не отличит его от обычного HTTPS. Работает там, где OpenVPN и WireGuard могут блокироваться.</p></div>
+      <div class="faq-item"><div class="faq-q">Прокси перестал работать?</div><p class="faq-a">Попробуй другой сервер из списка. Серверы обновляются регулярно — актуальный список всегда здесь. Или напиши в поддержку, поможем быстро.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="w">
+    <span class="sec-tag">// 05 · СЕРВЕРНАЯ КАРТА VPN</span>
+    <h2 class="sec-h">Все серверы онлайн</h2>
+    <div class="srv-wrap"><table class="srv-tbl">
+      <thead><tr><th>ЛОКАЦИЯ</th><th>СКОРОСТЬ</th><th>ТАРИФ</th><th>СТАТУС</th></tr></thead>
+      <tbody>
+        <tr><td>🇷🇺 Россия</td><td><div class="sbar"><div class="sfill" style="width:70px"></div>HIGH</div></td><td>PRO</td><td><span class="s-on">● ONLINE</span></td></tr>
+        <tr><td>🇵🇱 Польша</td><td><div class="sbar"><div class="sfill" style="width:90px"></div>MAX</div></td><td>PRO</td><td><span class="s-on">● ONLINE</span></td></tr>
+        <tr><td>🇳🇱 Нидерланды</td><td><div class="sbar"><div class="sfill" style="width:90px"></div>MAX</div></td><td>PRO</td><td><span class="s-on">● ONLINE</span></td></tr>
+        <tr><td>🇬🇧 Великобритания</td><td><div class="sbar"><div class="sfill" style="width:78px"></div>HIGH</div></td><td>PRO</td><td><span class="s-on">● ONLINE</span></td></tr>
+        <tr><td>🇦🇱 Албания</td><td><div class="sbar"><div class="sfill" style="width:64px"></div>MED</div></td><td>PRO</td><td><span class="s-on">● ONLINE</span></td></tr>
+        <tr><td>🇪🇸 Испания</td><td><div class="sbar"><div class="sfill" style="width:82px"></div>HIGH</div></td><td>PRO</td><td><span class="s-on">● ONLINE</span></td></tr>
+        <tr><td>🇵🇱 Польша LTE</td><td><div class="sbar"><div class="sfill" style="width:52px"></div>EXP</div></td><td>PRO+</td><td><span class="s-exp">● EXPERIMENTAL</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="w">
+    <h2 id="j-ctat"></h2>
+    <p id="j-ctad"></p>
+    <div class="cta-btns">
+      <a href="#proxy-block" class="btn btn-c">⬡ Прокси для Telegram</a>
+      <a id="j-ctavpn" href="#" target="_blank" class="btn btn-p">⬡ VPN VLESS — бота</a>
+      <a id="j-ctasup" href="#" target="_blank" class="btn btn-g">⬡ Поддержка</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="w">
+    <a href="#" class="logo">HIDE<em>YOU</em></a>
+    <ul class="f-links">
+      <li><a id="j-fbot" href="#" target="_blank">// VPN БОТ</a></li>
+      <li><a id="j-fsup" href="#" target="_blank">// ПОДДЕРЖКА</a></li>
+    </ul>
+    <span class="f-copy" id="j-fcopy"></span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function T(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function H(id,h){const e=document.getElementById(id);if(e)e.href=h;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+const t=CFG.t;
+T('j-navpill',t.navPill); T('j-badge',t.heroBadge);
+T('j-h1',t.heroLine1); T('j-h2',t.heroLine2); T('j-h3',t.heroLine3);
+T('j-sub',t.heroSub);
+T('j-ex1t',t.ex1title); T('j-ex1d',t.ex1desc);
+T('j-ex2t',t.ex2title); T('j-ex2d',t.ex2desc);
+T('j-ex3t',t.ex3title); T('j-ex3d',t.ex3desc);
+T('j-pbtitle',t.proxyBlockTitle); T('j-pbsub',t.proxyBlockSub);
+T('j-pbnote',t.proxyNote);
+T('j-howt',t.howTitle); T('j-howd',t.howDesc);
+T('j-s1t',t.step1t); T('j-s1d',t.step1d);
+T('j-s2t',t.step2t); T('j-s2d',t.step2d);
+T('j-s3t',t.step3t); T('j-s3d',t.step3d);
+T('j-cmpt',t.cmpTitle); T('j-cmpd',t.cmpDesc);
+T('j-plnt',t.plansTitle); T('j-plnd',t.plansDesc);
+T('j-ctat',t.ctaTitle); T('j-ctad',t.ctaDesc);
+T('j-fcopy',t.footerCopy);
+H('j-vpnbtn',CFG.botLink); H('j-pbsup',CFG.supportLink);
+H('j-s5sup',CFG.supportLink); H('j-s5note',CFG.supportLink);
+H('j-cmpvpn',CFG.botLink); H('j-p1btn',CFG.botLink);
+H('j-p2btn',CFG.botLink); H('j-ctavpn',CFG.botLink);
+H('j-ctasup',CFG.supportLink); H('j-fbot',CFG.botLink);
+H('j-fsup',CFG.supportLink);
+H('mm-bot',CFG.botLink); H('mm-sup',CFG.supportLink);
+const mtList=document.getElementById('mt-list');
+if(!CFG.mtproto.length){mtList.innerHTML='<div class="empty-note">// Прокси скоро появятся</div>';}
+else{CFG.mtproto.forEach(p=>{const d=document.createElement('div');d.className='pe';d.innerHTML=`<div class="pe-info"><div class="pe-name">${esc(p.name)}<span class="pe-tag">${esc(p.tag)}</span></div><div class="pe-addr">${esc(p.addr)}</div><div class="pe-desc">${esc(p.desc)}</div></div><a href="${esc(p.link)}" target="_blank" class="btn btn-c btn-sm">⬡ Подключить</a>`;mtList.appendChild(d);});}
+const s5List=document.getElementById('s5-list');
+if(!CFG.socks5.length){s5List.innerHTML='<div class="empty-note">// SOCKS5 прокси скоро появятся</div>';}
+else{CFG.socks5.forEach(p=>{const auth=p.login!=='';const d=document.createElement('div');d.className='se';d.innerHTML=`<div class="se-head"><div><div class="se-name">${esc(p.name)}<span class="se-tag">${esc(p.tag)}</span></div><div class="se-desc">${esc(p.desc)}</div></div></div><div class="se-creds"><div><div class="cred-label">IP АДРЕС</div><div class="cred-val">${esc(p.ip)}<button class="copy-btn" onclick="cp('${esc(p.ip)}')">📋</button></div></div><div><div class="cred-label">ПОРТ</div><div class="cred-val">${esc(p.port)}<button class="copy-btn" onclick="cp('${esc(p.port)}')">📋</button></div></div>${auth?`<div><div class="cred-label">ЛОГИН</div><div class="cred-val">${esc(p.login)}<button class="copy-btn" onclick="cp('${esc(p.login)}')">📋</button></div></div><div><div class="cred-label">ПАРОЛЬ</div><div class="cred-val">${esc(p.pass)}<button class="copy-btn" onclick="cp('${esc(p.pass)}')">📋</button></div></div>`:`<div style="grid-column:1/-1;"><div class="cred-label">АВТОРИЗАЦИЯ</div><div class="cred-val" style="color:var(--green);">Без пароля</div></div>`}</div><div class="se-hint">Тип прокси: <strong style="color:#fff;">SOCKS5</strong> · Сервер: <strong style="color:#fff;">${esc(p.ip)}</strong> · Порт: <strong style="color:#fff;">${esc(p.port)}</strong>${auth?' · Логин: <strong style="color:#fff;">'+esc(p.login)+'</strong>':''}</div>`;s5List.appendChild(d);});}
+function switchTab(id,btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-pane').forEach(c=>c.classList.remove('active'));btn.classList.add('active');document.getElementById('tab-'+id).classList.add('active');}
+function cp(val){navigator.clipboard.writeText(val).then(()=>toast('Скопировано: '+val)).catch(()=>{const a=document.createElement('textarea');a.value=val;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);toast('Скопировано: '+val);});}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
+function toggleMM(){const m=document.getElementById('mobileMenu');const b=document.getElementById('burgerBtn');const open=m.classList.toggle('open');b.classList.toggle('open',open);document.body.style.overflow=open?'hidden':'';}
+function closeMM(){document.getElementById('mobileMenu').classList.remove('open');document.getElementById('burgerBtn').classList.remove('open');document.body.style.overflow='';}
+document.querySelectorAll('.mobile-menu .mm-link, .mobile-menu .btn').forEach(el=>{el.addEventListener('click',closeMM);});
+</script>
+</body>
+</html>
