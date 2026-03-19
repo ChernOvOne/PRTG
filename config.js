@@ -14,8 +14,8 @@
 const CFG = {
 
   /* ── ССЫЛКИ ──────────────────────────────────────────────── */
-  botLink:     "https://t.me/HideeYouTopd_bot",
-  supportLink: "https://t.me/Hiqe_You",
+  botLink:     "https://t.me/MyVPN_bot",
+  supportLink: "https://t.me/MySupport",
 
 
   /* ── MTProto ПРОКСИ ──────────────────────────────────────────
@@ -28,23 +28,23 @@ const CFG = {
     {
       name: "ПРОКСИ RU-1",
       tag:  "БЫСТРЫЙ · ОФИЦИАЛЬНЫЙ",
-      addr: "tgrp.hideyou.top:8443",
-      link: "tg://proxy?server=tgrp.hideyou.top&port=8443&secret=25dfc3f71c37e7285412905f59502239",
-      desc: "Основной · Москва"
+      addr: "proxy.example.com:443",
+      link: "tg://proxy?server=proxy.example.com&port=443&secret=ВАШ_СЕКРЕТ_1",
+      desc: "Основной · Регион 1"
     },
     {
       name: "ПРОКСИ RU-2",
       tag:  "УЛУЧШЕННАЯ ЗАЩИТА с FAKE-TLS (Не работает с вкл VPN)",
-      addr: "tgmtg.hideyou.top:443",
-      link: "tg://proxy?server=tgmtg.hideyou.top&port=443&secret=7iBarTBpztZGGFxGjI6pr9BtYXgucnU",
-      desc: "Резервный · Москва"
+      addr: "proxy2.example.com:443",
+      link: "tg://proxy?server=proxy2.example.com&port=443&secret=ВАШ_СЕКРЕТ_2",
+      desc: "Резервный · Регион 2"
     },
     {
       name: "ПРОКСИ RU-3",
       tag:  "УЛУЧШЕННАЯ ЗАЩИТА с FAKE-TLS (Не работает с вкл VPN)",
-      addr: "tgtelemt.hideyou.top:9443",
-      link: "tg://proxy?server=tgtelemt.hideyou.top&port=9443&secret=ee701adfff820e7b0328e6f2d097bb61a46d61782e7275",
-      desc: "Резервный · Москва"
+      addr: "proxy3.example.com:9443",
+      link: "tg://proxy?server=proxy3.example.com&port=9443&secret=ВАШ_СЕКРЕТ_3",
+      desc: "Резервный · Регион 2"
     }
   ],
 
@@ -56,25 +56,25 @@ const CFG = {
     {
       name:  "SOCKS5 RU-1",
       tag:   "РОССИЯ",
-      ip:    "185.147.26.8",
+      ip:    "1.2.3.4",
       port:  "1080",
-      login: "hide",
-      pass:  "yfgfdr747reb84rg",
+      login: "user",
+      pass:  "password123",
       desc:  "Москва · для Telegram и браузера"
     },
     {
       name:  "SOCKS5 EU-1",
       tag:   "ЕВРОПА",
-      ip:    "185.220.101.45",
+      ip:    "5.6.7.8",
       port:  "1080",
-      login: "hideuser",
-      pass:  "secretpass123",
+      login: "myuser",
+      pass:  "mypassword",
       desc:  "Нидерланды · Без ограничений"
     },
     {
       name:  "SOCKS5 FREE",
       tag:   "БЕЗ ПАРОЛЯ",
-      ip:    "45.90.120.33",
+      ip:    "9.10.11.12",
       port:  "1080",
       login: "",
       pass:  "",
