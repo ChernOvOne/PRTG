@@ -597,6 +597,7 @@ delete_site() {
 
 list_sites() {
     section "🌐 Список сайтов"
+    set +e
 
     local found=0
     for f in "$NGINX_ENABLED"/*; do
@@ -616,7 +617,11 @@ list_sites() {
         line
     done
 
-    [[ $found -eq 0 ]] && info "Нет настроенных сайтов. Создай первый через пункт 3!"
+    if [[ $found -eq 0 ]]; then
+        info "Нет настроенных сайтов. Создай первый через пункт 3!"
+    fi
+    set -e
+    return 0
 }
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
