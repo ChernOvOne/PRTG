@@ -180,26 +180,7 @@ footer .w{display:flex;justify-content:space-between;align-items:center;gap:16px
 </head>
 <body>
 
-<!--
-  ════════════════════════════════════════════════════════════════
-  ⚙️  КОНФИГУРАЦИЯ подключается через SSI (Server Side Includes)
-  
-  Файл config.js хранится на сервере по пути:
-    /etc/nginx/private/ВАШ_ДОМЕН/config.js
-  
-  Браузер НЕ может получить этот файл напрямую.
-  Nginx вставляет его содержимое в HTML перед отправкой клиенту.
-  
-  Для редактирования конфига на сервере:
-    nano /etc/nginx/private/ВАШ_ДОМЕН/config.js
-  
-  Для загрузки с локального компьютера:
-    scp ./config.js user@IP:/etc/nginx/private/ВАШ_ДОМЕН/config.js
-  ════════════════════════════════════════════════════════════════
--->
-<script>
-<!--# include virtual="/.private/config.js" -->
-</script>
+<script src="config.js"></script>
 
 <div class="mobile-menu" id="mobileMenu">
   <a href="#proxy-block" class="mm-link" onclick="closeMM()">⬡ Прокси Telegram</a>
