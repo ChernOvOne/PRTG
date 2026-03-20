@@ -243,9 +243,17 @@ EOF
 
 setup_ssl_renewal() {
     section "🔐 Авто-обновление SSL"
-    (crontab -l 2>/dev/null; echo "0 3 * * * certbot renew --quiet --nginx && systemctl reload nginx") \
-        | sort -u | crontab -
-    log "Cron: обновление SSL каждый день в 03:00"
+    set +e
+    local existing
+    existing=$(crontab -l 2>/dev/null || true)
+    local cronline="0 3 * * * certbot renew --quiet --nginx && systemctl reload nginx"
+    if echo "$existing" | grep -qF "$cronline"; then
+        log "Cron уже настроен"
+    else
+        (echo "$existing"; echo "$cronline") | crontab -
+        log "Cron: обновление SSL каждый день в 03:00"
+    fi
+    set -e
 }
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
