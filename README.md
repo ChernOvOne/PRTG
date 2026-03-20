@@ -11,7 +11,7 @@
 bash <(curl -fsSL https://raw.githubusercontent.com/ChernOvOne/PRTG/main/webserver-setup.sh)
 ```
 
-После установки управление сервером:
+После установки:
 
 ```bash
 sudo webm
@@ -24,11 +24,11 @@ sudo webm
 | # | Действие |
 |---|---------|
 | `1` | Полная установка |
-| `2` | Переустановить команду `webm` |
+| `2` | Переустановить `webm` |
 | `3` | Создать новый сайт |
 | `4` | Список сайтов |
 | `5` | Удалить сайт |
-| `6` | Выпустить SSL для домена |
+| `6` | Выпустить SSL |
 | `7` | Обновить SSL вручную |
 | `8` | Статус сервера |
 | `9` | Запустить все сервисы |
@@ -46,25 +46,26 @@ sudo webm
 sudo webm → 3) Создать новый сайт
 ```
 
-Скрипт спросит домен, ссылку на бота и поддержку, затем автоматически:
+Скрипт спросит домен, ссылку на бота и поддержку, затем:
 - Скачает `index.html` с GitHub
-- Создаст `config.js` с введёнными данными
-- Настроит Nginx + SSL
+- Скачает `config.js` с GitHub и подставит введённые ссылки
+- Настроит Nginx
+- Предложит выпустить SSL
 
 ---
 
 ## 🔒 config.js
 
-Хранится в `/etc/nginx/ssi/ДОМЕН/config.js`.
+Лежит рядом с `index.html` в `/var/www/ДОМЕН/html/config.js`.
 
 **Редактировать на сервере:**
 ```bash
-nano /etc/nginx/ssi/ДОМЕН/config.js
+nano /var/www/ДОМЕН/html/config.js
 ```
 
 **Загрузить с компьютера:**
 ```bash
-scp config.js root@IP:/etc/nginx/ssi/ДОМЕН/config.js
+scp config.js root@IP:/var/www/ДОМЕН/html/config.js
 ```
 
 ### Структура файла
@@ -94,7 +95,7 @@ const CFG = {
     }
   ],
 
-  // SOCKS5 прокси — login/pass оставь "" если авторизация не нужна
+  // SOCKS5 прокси — login/pass = "" если авторизация не нужна
   socks5: [
     {
       name:  "SOCKS5 RU-1",
@@ -157,17 +158,15 @@ const CFG = {
 ## 📁 Структура файлов на сервере
 
 ```
-/usr/local/bin/webm                  ← команда webm
-/var/log/webm.log                    ← лог всех действий
+/usr/local/bin/webm              ← команда webm
+/var/log/webm.log                ← лог всех действий
 
 /var/www/ДОМЕН/html/
-  └── index.html                     ← страница сайта
+  ├── index.html                 ← страница сайта
+  └── config.js                 ← конфиг (прокси, ссылки, тексты)
 
-/etc/nginx/ssi/ДОМЕН/
-  └── config.js                      ← конфиг (прокси, ссылки)
-
-/etc/nginx/sites-available/ДОМЕН    ← конфиг Nginx
-/var/www/_github_cache/              ← кэш файлов с GitHub
+/etc/nginx/sites-available/ДОМЕН ← конфиг Nginx
+/var/www/_github_cache/          ← кэш файлов с GitHub
 ```
 
 ---
@@ -181,11 +180,23 @@ scp index.html root@IP:/var/www/ДОМЕН/html/index.html
 
 **config.js:**
 ```bash
-scp config.js root@IP:/etc/nginx/ssi/ДОМЕН/config.js
+scp config.js root@IP:/var/www/ДОМЕН/html/config.js
 ```
 
 **Скрипт webm:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ChernOvOne/PRTG/main/webserver-setup.sh \
   -o /usr/local/bin/webm && chmod +x /usr/local/bin/webm
+```
+
+---
+
+## ⚙️ Прямые команды
+
+```bash
+sudo webm --status      # статус сервера
+sudo webm --restart     # перезапустить сервисы
+sudo webm --renew-ssl   # обновить SSL
+sudo webm --install     # полная установка
+sudo webm --help        # справка
 ```
